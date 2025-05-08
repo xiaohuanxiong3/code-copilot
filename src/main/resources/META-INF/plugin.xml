@@ -1,0 +1,86 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin require-restart="false">
+    <id>com.github.xiaohuanxiong3.codecopilot</id>
+    <name>code-copilot</name>
+    <vendor>xiaohuanxiong3</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+<!--    <depends>com.intellij.java</depends>-->
+<!--    <depends>org.jetbrains.kotlin</depends>-->
+    <depends optional="true" config-file="plugin-java.xml">com.intellij.java</depends>
+    <depends optional="true" config-file="plugin-kotlin.xml">org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="plugin-python.xml">com.intellij.modules.python</depends>
+
+    <resource-bundle>messages.MyBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup displayType="BALLOON"
+                           id="code-copilot"
+                           isLogByDefault="false"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="code-copilot" factoryClass="com.github.xiaohuanxiong3.codecopilot.toolWindow.AIChatToolWindowFactory" anchor="right"/>
+        <actionPromoter order="last" implementation="com.github.xiaohuanxiong3.codecopilot.support.actionPromoter.EditorActionPromoter"/>
+<!--        <editorFactoryListener implementation="com.github.xiaohuanxiong3.codecopilot.completion.AutocompleteEditorListener"/>-->
+        <editorFactoryListener implementation="com.github.xiaohuanxiong3.codecopilot.completion.InlineCompletionEditorListener"/>
+        <statusBarWidgetFactory implementation="com.github.xiaohuanxiong3.codecopilot.completion.AutocompleteSpinnerWidgetFactory"
+                                id="AutocompleteSpinnerWidget"/>
+    </extensions>
+
+    <actions>
+
+        <!-- 代码补全 Action-->
+
+        <!-- 全量接受补全建议 -->
+        <action id="com.github.xiaohuanxiong3.codecopilot.completion.action.TabAcceptAction"
+                class="com.github.xiaohuanxiong3.codecopilot.completion.action.TabAcceptAction"
+                text="Accept Inline Completion Suggestion" description="Accept Inline Completion Suggestion">
+            <keyboard-shortcut keymap="$default" first-keystroke="TAB"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="TAB"/>
+        </action>
+
+        <!-- 按行接受补全建议-->
+        <action id="com.github.xiaohuanxiong3.codecopilot.completion.action.AcceptNextLineAction"
+                class="com.github.xiaohuanxiong3.codecopilot.completion.action.AcceptNextLineAction"
+                text="Accept Next Line" description="Accept Next Line">
+            <keyboard-shortcut keymap="$default" first-keystroke="control TAB"/>
+        </action>
+
+        <!-- 按单词接受补全建议-->
+        <action id="com.github.xiaohuanxiong3.codecopilot.completion.action.AcceptNextWordAction"
+                class="com.github.xiaohuanxiong3.codecopilot.completion.action.AcceptNextWordAction"
+                text="Accept Next Word" description="Accept Next Word">
+            <keyboard-shortcut keymap="$default" first-keystroke="control RIGHT"/>
+        </action>
+
+        <!-- 拒绝补全建议-->
+        <action id="com.github.xiaohuanxiong3.codecopilot.completion.action.RejectOrCancelCompletionAction"
+                class="com.github.xiaohuanxiong3.codecopilot.completion.action.RejectOrCancelCompletionAction"
+                text="Reject Inline Completion Suggestion" description="Reject Inline Completion Suggestion">
+            <keyboard-shortcut keymap="$default" first-keystroke="ESCAPE"/>
+        </action>
+
+        <!-- 代码补全 Action-->
+
+        <!-- 内联编辑 Action-->
+
+        <!-- 显示内联编辑对话框-->
+        <action class="com.github.xiaohuanxiong3.codecopilot.inlineEdit.action.InlineEditAction"
+                id="com.github.xiaohuanxiong3.codecopilot.inlineEdit.action.InlineEditAction"
+                text="Inline Edit"
+                description="Inline Edit">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt I"/>
+            <keyboard-shortcut first-keystroke="meta I" keymap="Mac OS X" />
+        </action>
+
+
+
+        <!-- 内联编辑 Action-->
+
+    </actions>
+
+    <applicationListeners>
+
+    </applicationListeners>
+</idea-plugin>

@@ -1,0 +1,21 @@
+{
+    "chatModels": [
+        {
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "name": "deepseek-v3-0324(DeepSeek)",
+            "url": "https://api.deepseek.com/beta/v1",
+            "apiKey": "123456789123456789",
+            "maxTokens": 8192
+        }
+    ],
+    "autoCompleteModels": [
+
+    ],
+    "inlineEditModels": [
+
+    ],
+    "applyCodeModels": [
+
+    ]
+}

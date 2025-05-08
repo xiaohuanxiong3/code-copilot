@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="css/highlight.min.js"></script>
+        <link rel="stylesheet" href="css/chat.css" />
+        <title>AI编码助手</title>
+    </head>
+
+    <body>
+        <div class="chat-container" id="chat-container">
+            <div class="chat-header">
+                <p>Hello World!</p>
+            </div>
+            <div class="chat-window" id="chatWindow">
+                <div class="message-window" id="message-window">
+
+                </div>
+                <div class="file-container" id="file-container">
+
+                </div>
+                <div class="chat-input" id="chat-input">
+                    <div class="input-editor">
+                        <select id="model-select" title="Select Model">
+                            <option value="DeepSeek">DeepSeek</option>
+                            <option value="GithubModels">gpt-4o(github-free)</option>
+                        </select>
+                        <textarea id="user-input" spellcheck="false" placeholder='输入"/"调用快捷命令'>
+                            
+                        </textarea>
+                        <div id="command-list" class="command-list">
+                            <div class="command-item" data-command="tab" tabindex="0">tab</div>
+                            <div class="command-item" data-command="select-file" tabindex="1">select file</div>
+                            <div class="command-item" data-command="terminal" tabindex="2">terminal</div>
+                            <div class="command-item" data-command="diagnostics" tabindex="3">diagnostics</div>
+                            <div class="command-item" data-command="clear" tabindex="4">clear</div>
+                            <!-- 可以添加更多快捷指令 -->
+                        </div>
+                    </div>
+                    <div class="icons-container">
+                        <span class="icon" id="send-button">&#10148;</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="stop-button-container">
+            <span id="stop-button" onclick="stopChat()">&#x23F9;</span>
+        </div>
+        <!-- <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAuklEQVR4XmNgGDTgYGXwueO1of9JwD9P1oV6ww0ACboaaRPEIHVg9TUh9SBMtgEnasMWHqsNKSDLACDefaI29MahylBRsgw4VhsadbUhlA2umVQDUDTCwKGq4PdBVgYYGpAxSB6kDl0vGOwvD9rUHGr/G10TMgbJg9Sh6wWDEw1BMgerQj40h9n/DrLUR7UZyAeJg RB6tD1wgFI8kBF0EaQQuREA KDxPFqphgAbbqFbCsBfAtd/8ABAFqvCWCLT/1dAAAAAElFTkSuQmCC" alt="AI Chat Icon" /> -->
+    </body>
+
+    <script>
+        const chatWindow = document.getElementById("chatWindow");
+        const messageWindow = document.getElementById("message-window");
+        const fileContainer = document.getElementById("file-container")
+        const chatInput = document.getElementById("chat-input");
+        const userInput = document.getElementById("user-input");
+        const commandList = document.getElementById("command-list");
+        const sendButton = document.getElementById("send-button");
+        const selectModelElement = document.getElementById("model-select");
+
+        const parser = new DOMParser();
+        const defaultTextareaHeight = '50px'; // 设置默认高度
+        let currentCommandIndex = -1;
+        let showStopResponseButton = false;
+        let chatContext = [];
+    </script>
+
+<!--    <script src="utils.js"></script>-->
+<!--    <script src="main.js"></script>-->
+<!--    <script src="command.js"></script>-->
+
+<!--    <script>-->
+<!--        // 初始化-->
+<!--        userInput.value = userInput.value.trim();-->
+<!--        adjustTextareaHeight(userInput, true);-->
+<!--    </script>-->
+</html>

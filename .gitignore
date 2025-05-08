@@ -1,0 +1,9 @@
+.gradle
+.idea
+.intellijPlatform
+.qodana
+build
+
+src/main/resources/config.json
+
+.run
