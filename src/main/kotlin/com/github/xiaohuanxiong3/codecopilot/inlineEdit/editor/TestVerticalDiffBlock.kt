@@ -168,12 +168,6 @@ class TestVerticalDiffBlock(
     }
 
     private fun renderDeletedLinesInlay() {
-//        createDeletionTextComponent(deletedLines.joinToString("\n")).let {
-//            val disposable = editorComponentInlaysManager.insert(startLine, it, true)
-////            val disposable = FullWidthInlayManager.insert(editor, startLine, it)
-//            deletionInlay = disposable
-//        }
-//        deletionInlay = FullWidthInlayManager.insert(editor, startLine, deletedLines.joinToString("\n"))
         createDeletionTextComponent(deletedLines.joinToString("\n")).let {
             deletionInlay = MyEditorComponentManager.addComponent(
                 editor as EditorEx,
@@ -183,14 +177,6 @@ class TestVerticalDiffBlock(
         }
     }
 
-//    private fun createDeletionTextComponent(text: String) = JTextPane().apply {
-//        styledDocument.insertString(0, text, null)
-//        isEditable = false
-//        background = JBColor(0x30FF0000, 0x30FF0000)
-//        foreground = JBColor.GRAY
-//        border = BorderFactory.createEmptyBorder()
-//        font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
-//    }
     private fun createDeletionTextComponent(text: String) = JTextArea(text).apply {
         isEditable = false
         background = JBColor(0x30FF0000, 0x30FF0000)
