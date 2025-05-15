@@ -2,7 +2,7 @@ package com.github.xiaohuanxiong3.codecopilot.inlineEdit.diff
 
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.DiffLineType
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.InlineEditContext
-import com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor.VerticalDiffBlock
+import com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor.TestVerticalDiffBlock
 import com.github.xiaohuanxiong3.codecopilot.support.editor.EditorComponentInlaysManager
 import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
 import com.intellij.openapi.application.invokeLater
@@ -27,12 +27,12 @@ class DiffHandler(
     private data class CurLineState(
         var index: Int,
         var highlighter: RangeHighlighter? = null,
-        var diffBlock: VerticalDiffBlock? = null
+        var diffBlock: TestVerticalDiffBlock? = null
     )
 
     private var curLine = CurLineState(0)
 
-    private val diffBlocks: MutableList<VerticalDiffBlock> = mutableListOf()
+    private val diffBlocks: MutableList<TestVerticalDiffBlock> = mutableListOf()
     private val curLineKey = EditorUtil.createTextAttributesKey("CODE_COPILOT_CURRENT_LINE", 0x40888888, editor)
     private val editorComponentInlaysManager = EditorComponentInlaysManager.from(editor, false)
 
@@ -98,8 +98,8 @@ class DiffHandler(
         curLine.index++
     }
 
-    private fun createDiffBlock(): VerticalDiffBlock {
-        val diffBlock = VerticalDiffBlock(
+    private fun createDiffBlock(): TestVerticalDiffBlock {
+        val diffBlock = TestVerticalDiffBlock(
             editor = editor,
             project = project,
             startLine = curLine.index,
@@ -112,28 +112,28 @@ class DiffHandler(
         return diffBlock
     }
 
-    private fun handleDiffBlockAcceptOrReject(diffBlock: VerticalDiffBlock, didAccept: Boolean) {
+    private fun handleDiffBlockAcceptOrReject(diffBlock: TestVerticalDiffBlock, didAccept: Boolean) {
         diffBlocks.remove(diffBlock)
 
         // handle didAccept or didReject
-        if (didAccept) {
-            updatePositionsOnAccept(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLineCount)
+        if (diffBlocks.isNotEmpty()) {
+            if (didAccept) {
+                updatePositionsOnAccept(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLineCount)
+            } else {
+                updatePositionsOnReject(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLineCount)
+            }
         } else {
-            updatePositionsOnReject(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLineCount)
-        }
-
-        if (diffBlocks.isEmpty()) {
-            onClose()
+            resetState()
         }
     }
 
     private fun updatePositionsOnAccept(startLine: Int, numAdditions: Int, numDeletions: Int) {
-        val offset = - numDeletions
-        updatePositions(startLine, offset)
+//        val offset = - numDeletions
+        updatePositions(startLine, 0)
     }
 
     private fun updatePositionsOnReject(startLine: Int, numAdditions: Int, numDeletions: Int) {
-        val offset = - numAdditions
+        val offset = - numAdditions + numDeletions
         updatePositions(startLine, offset)
     }
 
@@ -151,7 +151,7 @@ class DiffHandler(
         }
 
         curLine.diffBlock!!.deleteLineAt(curLine.index)
-        curLine.index++
+//        curLine.index++
     }
 
     private fun updateProgressHighlighters(type: DiffLineType) {
@@ -187,7 +187,7 @@ class DiffHandler(
         try {
             diffBlocks.forEach {
                 it.onReject()
-                updatePositionsOnReject(it.startLine, it.addedLines.size, it.deletedLineCount)
+                updatePositionsOnReject(it.startLine, it.addedLines.size, it.deletedLines.size)
             }
         } catch (e: Exception) {
             thisLogger().info("Error rejecting all diffs: ${e.message}")
