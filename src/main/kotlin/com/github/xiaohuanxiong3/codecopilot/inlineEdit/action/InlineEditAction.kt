@@ -9,9 +9,9 @@ import com.github.xiaohuanxiong3.codecopilot.inlineEdit.diff.DiffHandler
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.diff.DiffService
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor.CustomPanel
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor.JComponentMaker
-import com.github.xiaohuanxiong3.codecopilot.support.langchain4j.AIServiceJsonResponse
 import com.github.xiaohuanxiong3.codecopilot.support.diff.MyUnifiedDiffUtils
 import com.github.xiaohuanxiong3.codecopilot.support.editor.EditorComponentInlaysManager
+import com.github.xiaohuanxiong3.codecopilot.support.langchain4j.AIServiceJsonResponse
 import com.github.xiaohuanxiong3.codecopilot.support.langchain4j.httpclient.DeepSeekInlineCompletionHttpClientBuilder
 import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
 import com.github.xiaohuanxiong3.codecopilot.util.globalIOScope
@@ -137,7 +137,6 @@ class InlineEditAction : AnAction(), DumbAware {
                         )?.let { chatResponse ->
                             val response = objectMapper.readValue(chatResponse.aiMessage().text(), AIServiceJsonResponse::class.java).r
                             editor.project?.let { project ->
-//                                DiffUtil.shouInlineEditDiff(project, editor.virtualFile, response, {})
                                 val inlineEditContext = InlineEditContext(
                                     editor.virtualFile.path,
                                     editor.document.text
@@ -167,45 +166,6 @@ class InlineEditAction : AnAction(), DumbAware {
                     }
 
                 }
-
-
-//                AIServiceDelegate.inlineEdit(
-//                    editor.document.text,
-//                    textArea.text,
-//                    callback = { response ->
-//                        response?.let {
-//                            editor.project?.let { project ->
-////                                DiffUtil.shouInlineEditDiff(project, editor.virtualFile, response, {})
-//                                val inlineEditContext = InlineEditContext(
-//                                    editor.virtualFile.path,
-//                                    editor.document.text
-//                                    )
-//                                if (!returnDiffPatch) {
-//                                    MyUnifiedDiffUtils.handleUnifiedDiff(inlineEditContext,
-//                                        UnifiedDiffUtils.generateUnifiedDiff(
-//                                            "o.txt",
-//                                            "r.txt",
-//                                            editor.document.text.lines(),
-//                                            DiffUtils.diff(
-//                                                editor.document.text.lines(),
-//                                                response.lines()
-//                                            ),
-//                                            3
-//                                        ).joinToString("\n"))
-//                                } else {
-//                                    MyUnifiedDiffUtils.handleUnifiedDiff(inlineEditContext, response)
-//                                }
-//                                diffHandler.applyDiffLinesToEditor(inlineEditContext) {
-//                                    customPanelRef.get().finish()
-//                                }
-//                            }
-//                        }
-//                    },
-//                    finishCallback = {
-//                        customPanelRef.get().finish()
-//                    },
-//                    returnDiffPatch = returnDiffPatch
-//                )
             }
         }
 

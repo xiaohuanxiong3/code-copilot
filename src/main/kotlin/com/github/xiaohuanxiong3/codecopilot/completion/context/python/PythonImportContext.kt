@@ -32,27 +32,6 @@ object PythonImportContext {
                         }
                     }
                 }
-//                if (importStatement is PyImportStatement) {
-//                    importStatement.importElements.forEach { importElement ->
-//                        importElement.multiResolve().first().element.let { element ->
-//                            element?.text?.let {
-//                                if (fileIndex.isInSource(element.containingFile.virtualFile)) {
-//                                    map[element.containingFile.getQName().toString()] = element.text
-//                                }
-//                            }
-//                        }
-//                    }
-//                } else if (importStatement is PyFromImportStatement) {
-//                    importStatement.importElements.forEach { candidate->
-//                        candidate.multiResolve().first().element.let { element ->
-//                            element?.text?.let {
-//                                if (fileIndex.isInSource(element.containingFile.virtualFile)) {
-//                                    map[element.containingFile.getQName().toString()] = element.text
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
     }

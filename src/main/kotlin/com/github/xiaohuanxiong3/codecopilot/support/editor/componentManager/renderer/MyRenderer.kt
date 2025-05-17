@@ -1,16 +1,16 @@
 package com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer
 
-import com.github.xiaohuanxiong3.codecopilot.ui.UI
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.component.RendererComponent
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.editor.EditorCustomElementRenderer
 import com.intellij.openapi.editor.Inlay
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.ui.components.JBScrollPane
 import net.miginfocom.swing.MigLayout
 import java.awt.AlphaComposite
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
-import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import kotlin.math.max
@@ -19,15 +19,15 @@ import kotlin.math.max
  * @Author Handsome Young
  * @Date 2025/5/15 14:36
  */
-open class MyRenderer(private val component: JComponent, private val myEditorScrollPane: JScrollPane) : JPanel(
+abstract class MyRenderer(private val component: RendererComponent, myEditor: EditorEx) : JPanel(
     MigLayout("fill, insets 0")
 ), EditorCustomElementRenderer {
 
     private var myInlay: Inlay<MyRenderer>? = null
 
-    init {
-        add(component, UI.fillX())
+    private val myEditorScrollPane: JScrollPane = myEditor.scrollPane
 
+    init {
         isOpaque = false
     }
 

@@ -2,13 +2,13 @@ package com.github.xiaohuanxiong3.codecopilot.inlineEdit.diff
 
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.DiffLineType
 import com.github.xiaohuanxiong3.codecopilot.inlineEdit.InlineEditContext
-import com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor.TestVerticalDiffBlock
-import com.github.xiaohuanxiong3.codecopilot.support.editor.EditorComponentInlaysManager
+import com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor.VerticalDiffBlock
 import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
@@ -27,14 +27,15 @@ class DiffHandler(
     private data class CurLineState(
         var index: Int,
         var highlighter: RangeHighlighter? = null,
-        var diffBlock: TestVerticalDiffBlock? = null
+        var diffBlock: VerticalDiffBlock? = null
     )
 
     private var curLine = CurLineState(0)
 
-    private val diffBlocks: MutableList<TestVerticalDiffBlock> = mutableListOf()
+    private val diffBlocks: MutableList<VerticalDiffBlock> = mutableListOf()
     private val curLineKey = EditorUtil.createTextAttributesKey("CODE_COPILOT_CURRENT_LINE", 0x40888888, editor)
-    private val editorComponentInlaysManager = EditorComponentInlaysManager.from(editor, false)
+
+    private var myVisibleAreaChangeHandler : VisibleAreaListener? = null
 
     fun applyDiffLinesToEditor(inlineEditContext: InlineEditContext, callback: () -> Unit) {
         invokeLater {
@@ -45,11 +46,15 @@ class DiffHandler(
             }
 
             cleanupProgressHighlighters()
+            // 给编辑器添加临时的 VisibleAreaListener
+            myVisibleAreaChangeHandler = VisibleAreaListener {
+                diffBlocks.forEach {
+                    it.onVisibleAreaChange()
+                }
+            }
+            myVisibleAreaChangeHandler?.let { editor.scrollingModel.addVisibleAreaListener(it) }
             callback()
         }
-//        invokeLater {
-//
-//        }
     }
 
     private fun handleDiffLine(diffLineType: DiffLineType, lineText: String) {
@@ -98,13 +103,12 @@ class DiffHandler(
         curLine.index++
     }
 
-    private fun createDiffBlock(): TestVerticalDiffBlock {
-        val diffBlock = TestVerticalDiffBlock(
+    private fun createDiffBlock(): VerticalDiffBlock {
+        val diffBlock = VerticalDiffBlock(
             editor = editor,
             project = project,
             startLine = curLine.index,
-            onAcceptReject = ::handleDiffBlockAcceptOrReject,
-            editorComponentInlaysManager = editorComponentInlaysManager
+            onAcceptReject = ::handleDiffBlockAcceptOrReject
         )
 
         diffBlocks.add(diffBlock)
@@ -112,15 +116,15 @@ class DiffHandler(
         return diffBlock
     }
 
-    private fun handleDiffBlockAcceptOrReject(diffBlock: TestVerticalDiffBlock, didAccept: Boolean) {
+    private fun handleDiffBlockAcceptOrReject(diffBlock: VerticalDiffBlock, didAccept: Boolean) {
         diffBlocks.remove(diffBlock)
 
         // handle didAccept or didReject
         if (diffBlocks.isNotEmpty()) {
             if (didAccept) {
-                updatePositionsOnAccept(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLineCount)
+                updatePositionsOnAccept(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLines.size)
             } else {
-                updatePositionsOnReject(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLineCount)
+                updatePositionsOnReject(diffBlock.startLine, diffBlock.addedLines.size, diffBlock.deletedLines.size)
             }
         } else {
             resetState()
@@ -195,17 +199,18 @@ class DiffHandler(
         resetState()
     }
 
+    // todo 可能改个名字比较好
     private fun resetState() {
-        // Clear the editor's highlighting/inlays
-//        editor.markupModel.removeAllHighlighters()
-//        diffBlocks.forEach { it.clearEditorUI() }
-
         // Clear state vars
         diffBlocks.clear()
         curLine = CurLineState(0)
 
         // Close the Edit input
         onClose()
+
+        // remove the temporary VisibleAreaListener
+        myVisibleAreaChangeHandler?.let { editor.scrollingModel.removeVisibleAreaListener(it) }
+        myVisibleAreaChangeHandler = null
     }
 
 }
