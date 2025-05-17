@@ -378,43 +378,6 @@ class InlineCompletionService(private val project: Project) : Disposable {
                 } finally {
                     widget?.setLoading(false)
                 }
-//                AIServiceDelegate.completion(
-//                    requestContext,
-//                    callback = { response ->
-//                        response?.let{
-//                            // 只有响应对应的 completionId 与当前 completionId 相同才执行相关操作
-//                            current?.let { context ->
-//                                if (it.completionId == context.requestContext.completionId && it.completionContent.isNotBlank()) {
-//                                    ValidationUtil.validateSuccessThen(
-//                                        project,
-//                                        context.requestContext,
-//                                        it.completionContent
-//                                    ) {
-//                                        val line = context.requestContext.linePrefix
-//                                        context.completionContentHolder.completionContent =
-//                                            if (line != null && line.endsWith(" "))
-//                                                it.completionContent.trimStart() else it.completionContent
-//                                        if (context.requestContext.lineSuffixMatch) {
-//                                            val firstLine = context.completionContentHolder.completionContent!!.lines().firstOrNull()
-//                                            if (!firstLine.isNullOrBlank() && firstLine.lastIndexOf(context.requestContext.lineSuffix!!) != -1) {
-//                                                context.completionContentHolder.lineSuffixStartOffset = firstLine.lastIndexOf(context.requestContext.lineSuffix)
-//                                                context.completionContentHolder.lineSuffixLength = context.requestContext.lineSuffix.length
-//                                            } else {
-//                                                return@validateSuccessThen
-//                                            }
-//                                        }
-//                                        invokeLater {
-//                                            renderCurrentCompletion()
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    },
-//                    finishCallback = {
-//                        widget?.setLoading(false)
-//                    }
-//                )
             }
             current = InlineCompletionContext(requestContext, InlineCompletionContext.CompletionContentHolder(requestContext.completionId, editor, offset, startLineOffset), job)
         }

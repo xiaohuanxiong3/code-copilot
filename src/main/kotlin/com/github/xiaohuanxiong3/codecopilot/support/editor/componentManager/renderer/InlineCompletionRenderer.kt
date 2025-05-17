@@ -1,17 +1,17 @@
 package com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer
 
-import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.component.InlineCompletionRendererComponent
-import com.github.xiaohuanxiong3.codecopilot.ui.UI
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.context.InlineCompletionRendererContext
 import com.intellij.openapi.editor.ex.EditorEx
+import net.miginfocom.layout.CC
 
 /**
  * @Author Handsome Young
  * @Date 2025/5/15 21:38
  */
-class InlineCompletionRenderer(private val component: InlineCompletionRendererComponent, private val editor: EditorEx) : MyRenderer(component, editor) {
+class InlineCompletionRenderer(private val context: InlineCompletionRendererContext, private val editor: EditorEx) : MyRenderer(context, editor) {
 
     init {
-        add(component.textArea, UI.fill())
+        add(context.textArea, CC().growX())
     }
 
     override fun getPreferredWidth(): Int {

@@ -1,7 +1,7 @@
 package com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager
 
-import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.component.InlineCompletionRendererComponent
-import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.component.RendererComponent
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.context.InlineCompletionRendererContext
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.context.RendererContext
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.InlineCompletionRenderer
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.MyRenderer
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.RendererType
@@ -20,12 +20,12 @@ object MyEditorComponentManager {
 
     private val COMPONENT_INLAYS_KEY = Key.create<MyComponentInlays>("ComponentInlays")
 
-    fun addComponent(editor: EditorEx, component: RendererComponent, offset: Int, rendererType: RendererType) : Inlay<MyRenderer>? {
+    fun addComponent(editor: EditorEx, component: RendererContext, offset: Int, rendererType: RendererType) : Inlay<MyRenderer>? {
         ThreadingAssertions.assertEventDispatchThread()
         val inlays = getComponentInlaysFor(editor)
         return when(rendererType) {
             RendererType.INLINE_COMPLETION -> {
-                inlays.add(offset, InlineCompletionRenderer(component as InlineCompletionRendererComponent, editor))
+                inlays.add(offset, InlineCompletionRenderer(component as InlineCompletionRendererContext, editor))
             }
         }
     }

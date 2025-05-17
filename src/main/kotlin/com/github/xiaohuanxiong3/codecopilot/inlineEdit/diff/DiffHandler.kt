@@ -7,11 +7,14 @@ import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.VisibleAreaListener
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
+import java.awt.event.MouseEvent
+import java.awt.event.MouseMotionAdapter
+import java.awt.event.MouseMotionListener
 import kotlin.math.min
 
 /**
@@ -20,7 +23,7 @@ import kotlin.math.min
  */
 class DiffHandler(
     private val project: Project,
-    private val editor: Editor,
+    private val editor: EditorEx,
     private val onClose: () -> Unit
 ){
 
@@ -37,6 +40,8 @@ class DiffHandler(
 
     private var myVisibleAreaChangeHandler : VisibleAreaListener? = null
 
+    private var myMouseMotionListener: MouseMotionListener? = null
+
     fun applyDiffLinesToEditor(inlineEditContext: InlineEditContext, callback: () -> Unit) {
         invokeLater {
             inlineEditContext.diffLines?.forEach { diffLine ->
@@ -46,15 +51,57 @@ class DiffHandler(
             }
 
             cleanupProgressHighlighters()
-            // 给编辑器添加临时的 VisibleAreaListener
-            myVisibleAreaChangeHandler = VisibleAreaListener {
-                diffBlocks.forEach {
-                    it.onVisibleAreaChange()
-                }
-            }
-            myVisibleAreaChangeHandler?.let { editor.scrollingModel.addVisibleAreaListener(it) }
+
+            initAndAddVisibleAreaChangeHandler()
+            initAndAddMouseMotionListener()
+
             callback()
         }
+    }
+
+    /**
+     * 给编辑器添加临时的 VisibleAreaListener
+     */
+    private fun initAndAddVisibleAreaChangeHandler() {
+        myVisibleAreaChangeHandler = VisibleAreaListener {
+            diffBlocks.forEach {
+                it.onVisibleAreaChange()
+            }
+            editor.contentComponent.revalidate()
+            editor.contentComponent.repaint()
+        }
+        myVisibleAreaChangeHandler?.let { editor.scrollingModel.addVisibleAreaListener(it) }
+    }
+
+    /**
+     * 给编辑器添加临时的 MouseMotionListener
+     */
+    private fun initAndAddMouseMotionListener() {
+        myMouseMotionListener = object : MouseMotionAdapter() {
+            override fun mouseMoved(e: MouseEvent) {
+                val curPoint = e.point
+                val curLogicalPosition = editor.xyToLogicalPosition(curPoint)
+                val curLine = curLogicalPosition.line
+                diffBlocks.forEach {
+                    if (it.deletionInlay != null) {
+                        it.deletionInlay!!.bounds?.let { bounds ->
+                            if (bounds.contains(curPoint)) {
+                                it.updateButtonsVisible(true)
+                            } else {
+                                it.updateButtonsVisible(curLine in it.startLine until it.startLine + it.addedLines.size)
+                            }
+                        } ?: {
+                            it.updateButtonsVisible(curLine in it.startLine until it.startLine + it.addedLines.size)
+                        }
+                    } else {
+                        it.updateButtonsVisible(curLine in it.startLine until it.startLine + it.addedLines.size)
+                    }
+                }
+                editor.contentComponent.revalidate()
+                editor.contentComponent.repaint()
+            }
+        }
+        myMouseMotionListener?.let { editor.contentComponent.addMouseMotionListener(it) }
     }
 
     private fun handleDiffLine(diffLineType: DiffLineType, lineText: String) {
@@ -211,6 +258,8 @@ class DiffHandler(
         // remove the temporary VisibleAreaListener
         myVisibleAreaChangeHandler?.let { editor.scrollingModel.removeVisibleAreaListener(it) }
         myVisibleAreaChangeHandler = null
+        myMouseMotionListener?.let { editor.contentComponent.removeMouseMotionListener(it) }
+        myMouseMotionListener = null
     }
 
 }

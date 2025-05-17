@@ -1,6 +1,6 @@
 package com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer
 
-import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.component.RendererComponent
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.context.RendererContext
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.editor.EditorCustomElementRenderer
 import com.intellij.openapi.editor.Inlay
@@ -19,7 +19,7 @@ import kotlin.math.max
  * @Author Handsome Young
  * @Date 2025/5/15 14:36
  */
-abstract class MyRenderer(private val component: RendererComponent, myEditor: EditorEx) : JPanel(
+abstract class MyRenderer(private val context: RendererContext, myEditor: EditorEx) : JPanel(
     MigLayout("fill, insets 0")
 ), EditorCustomElementRenderer {
 

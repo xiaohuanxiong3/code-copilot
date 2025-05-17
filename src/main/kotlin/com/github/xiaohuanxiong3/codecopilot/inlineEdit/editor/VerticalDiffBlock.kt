@@ -1,13 +1,13 @@
 package com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor
 
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.MyEditorComponentManager
-import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.component.InlineCompletionRendererComponent
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.context.InlineCompletionRendererContext
+import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.MyRenderer
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.RendererType
 import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.ex.EditorEx
@@ -29,7 +29,7 @@ import kotlin.math.min
  * @Date 2025/1/26 19:14
  */
 class VerticalDiffBlock(
-    private val editor: Editor,
+    private val editor: EditorEx,
     private val project: Project,
     var startLine: Int,
     private val onAcceptReject: (VerticalDiffBlock, Boolean) -> Unit
@@ -40,7 +40,7 @@ class VerticalDiffBlock(
     val addedLines: MutableList<String> = mutableListOf()
     private val acceptButton: JButton
     private val rejectButton: JButton
-    private var deletionInlay: Disposable? = null
+    var deletionInlay: Inlay<MyRenderer>? = null
     // Used for calculation of the text area height when rendering buttons
     private var textComponent: JComponent? = null
     private val greenKey = EditorUtil.createTextAttributesKey("CODE_COPILOT_DIFF_NEW_LINE", 0x3000FF00, editor)
@@ -76,6 +76,16 @@ class VerticalDiffBlock(
     // 编辑器可见区域发生变化时触发
     fun onVisibleAreaChange() {
         updateButtonsLocation()
+    }
+
+    fun updateButtonsVisible(isVisible: Boolean) {
+        if (isVisible) {
+            acceptButton.isVisible = true
+            rejectButton.isVisible = true
+        } else {
+            acceptButton.isVisible = false
+            rejectButton.isVisible = false
+        }
     }
 
     private fun acceptDiff() {
@@ -164,19 +174,21 @@ class VerticalDiffBlock(
 
         // render buttons
         updateButtonsLocation()
+        refreshEditor()
     }
 
     fun updatePosition(newLineNumber: Int) {
         startLine = newLineNumber
 
         updateButtonsLocation()
+        refreshEditor()
     }
 
     private fun renderDeletedLinesInlay() {
         createDeletionTextComponent(deletedLines.joinToString("\n")).let {
             deletionInlay = MyEditorComponentManager.addComponent(
-                editor as EditorEx,
-                InlineCompletionRendererComponent(it),
+                editor,
+                InlineCompletionRendererContext(it),
                 editor.document.getLineStartOffset(startLine),
                 RendererType.INLINE_COMPLETION)
         }
@@ -205,13 +217,11 @@ class VerticalDiffBlock(
         )
 
         acceptButton.setBounds(
-            x + rejectButton.width + 10,
+            x + rejectButton.width + editor.scrollPane.verticalScrollBar.size.width,
             y,
             acceptButton.preferredSize.width,
             acceptButton.preferredSize.height
         )
-
-        refreshEditor()
     }
 
     private fun getButtonsXYPositions(): Pair<Int, Int> {
@@ -219,7 +229,7 @@ class VerticalDiffBlock(
         val lineStartPosition = editor.logicalPositionToXY(LogicalPosition(startLine - 1, 0))
 
         val xPosition =
-            visibleArea.x + visibleArea.width - acceptButton.preferredSize.width - rejectButton.preferredSize.width - 20
+            min(visibleArea.x + visibleArea.width, editor.scrollPane.width) - acceptButton.preferredSize.width - rejectButton.preferredSize.width - 2 * editor.scrollPane.verticalScrollBar.size.width
         val yPosition = lineStartPosition.y + editor.lineHeight
 
         return Pair(xPosition, yPosition)
@@ -234,6 +244,7 @@ class VerticalDiffBlock(
                 addActionListener {
                     handleReject()
                 }
+                isVisible = false
             }
 
         val acceptButton =
@@ -244,6 +255,7 @@ class VerticalDiffBlock(
                 addActionListener {
                     handleAccept()
                 }
+                isVisible = false
             }
 
         return Pair(acceptButton, rejectButton)

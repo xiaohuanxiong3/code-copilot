@@ -24,6 +24,7 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
@@ -84,6 +85,9 @@ class InlineEditAction : AnAction(), DumbAware {
 
         // 在 terminal 中不打开内联编辑对话框
         if (EditorUtil.isTerminal(editor)) return
+
+        // 限制 Editor 为 EditorEx，以便获取 JScrollPane
+        if (editor !is EditorEx) return
 
         val manager = EditorComponentInlaysManager.from(editor, true)
 
