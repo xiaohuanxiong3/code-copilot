@@ -17,10 +17,10 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.ui.JBColor
 import com.intellij.util.application
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import java.awt.*
 import javax.swing.BorderFactory
 import javax.swing.JButton
-import javax.swing.JComponent
 import javax.swing.JTextArea
 import kotlin.math.min
 
@@ -41,10 +41,7 @@ class VerticalDiffBlock(
     private val acceptButton: JButton
     private val rejectButton: JButton
     var deletionInlay: Inlay<MyRenderer>? = null
-    // Used for calculation of the text area height when rendering buttons
-    private var textComponent: JComponent? = null
     private val greenKey = EditorUtil.createTextAttributesKey("CODE_COPILOT_DIFF_NEW_LINE", 0x3000FF00, editor)
-    private val redKey = EditorUtil.createTextAttributesKey("CODE_COPILOT_DIFF_OLD_LINE", 0x30FF0000, editor)
 
     init {
         val (acceptBtn, rejectBtn) = createButtons()
@@ -201,9 +198,10 @@ class VerticalDiffBlock(
         border = JBUI.Borders.empty()
         lineWrap = false
         wrapStyleWord = false
-        font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
-
-        this@VerticalDiffBlock.textComponent = this
+        // 解决中文乱码问题
+        font = editor.colorsScheme.getFont(EditorFontType.PLAIN).let {
+            UIUtil.getFontWithFallbackIfNeeded(it, text)
+        }
     }
 
     private fun updateButtonsLocation() {
