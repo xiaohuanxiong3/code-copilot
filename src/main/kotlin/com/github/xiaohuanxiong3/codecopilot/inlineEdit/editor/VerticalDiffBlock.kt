@@ -1,10 +1,13 @@
 package com.github.xiaohuanxiong3.codecopilot.inlineEdit.editor
 
+import com.github.xiaohuanxiong3.codecopilot.completion.DocumentChangedTrigger
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.MyEditorComponentManager
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.context.InlineCompletionRendererContext
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.MyRenderer
 import com.github.xiaohuanxiong3.codecopilot.support.editor.componentManager.renderer.RendererType
 import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
+import com.github.xiaohuanxiong3.codecopilot.util.deleteString
+import com.github.xiaohuanxiong3.codecopilot.util.insertString
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Inlay
@@ -95,12 +98,12 @@ class VerticalDiffBlock(
             // Delete the added lines
             if (addedLines.isNotEmpty()) {
                 val endOffset = editor.document.getLineEndOffset(startLine + addedLines.size - 1) + 1
-                editor.document.deleteString(startOffset, endOffset)
+                editor.document.deleteString(startOffset, endOffset, DocumentChangedTrigger.INLINE_EDIT)
             }
 
             // Add the deleted lines back
             if (deletedLines.isNotEmpty()) {
-                editor.document.insertString(startOffset, deletedLines.joinToString("\n") + "\n")
+                editor.document.insertString(startOffset, deletedLines.joinToString("\n") + "\n", DocumentChangedTrigger.INLINE_EDIT)
             }
         }
     }
@@ -141,7 +144,7 @@ class VerticalDiffBlock(
 
         val offset = editor.document.getLineStartOffset(line)
 
-        editor.document.insertString(offset, text + "\n")
+        editor.document.insertString(offset, text + "\n", DocumentChangedTrigger.INLINE_EDIT)
         editor.markupModel.addLineHighlighter(greenKey, line, HighlighterLayer.LAST)
 
         addedLines.add(text)
@@ -154,7 +157,7 @@ class VerticalDiffBlock(
 
         deletedLines.add(deletedText.trimEnd())
 
-        editor.document.deleteString(startOffset, endOffset)
+        editor.document.deleteString(startOffset, endOffset, DocumentChangedTrigger.INLINE_EDIT)
     }
 
     fun onLastDiffLine() {

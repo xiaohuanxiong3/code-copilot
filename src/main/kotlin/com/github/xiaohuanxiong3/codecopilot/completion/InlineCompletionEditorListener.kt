@@ -1,5 +1,6 @@
 package com.github.xiaohuanxiong3.codecopilot.completion
 
+import com.github.xiaohuanxiong3.codecopilot.util.DOCUMENT_CHANGED_TRIGGER_KEY
 import com.github.xiaohuanxiong3.codecopilot.util.globalIOScope
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.service
@@ -70,6 +71,11 @@ class InlineCompletionDocumentListener(private val editor: Editor, private val e
     override fun documentChanged(event: DocumentEvent) {
         if (editor == editorManager.selectedTextEditor) {
             documentChangedListenerJob?.cancel()
+
+            // 判断是什么原因触发文档发生变化，决定是否需要触发补全
+            DOCUMENT_CHANGED_TRIGGER_KEY.get(event.document)?.let {
+                if (it == DocumentChangedTrigger.INLINE_EDIT) return
+            }
 
             inlineCompletionService.current?.let { current ->
                 if (!event.newFragment.isEmpty()) {
