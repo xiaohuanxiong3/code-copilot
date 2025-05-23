@@ -9,6 +9,7 @@ import com.github.xiaohuanxiong3.codecopilot.support.langchain4j.httpclient.Deep
 import com.github.xiaohuanxiong3.codecopilot.util.EditorUtil
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
@@ -336,9 +337,9 @@ class InlineCompletionService(private val project: Project) : Disposable {
                 current = null
             }
 
-            val requestContext = InlineCompletionContext.RequestContext.from(editor, offset)
-            val startLineOffset = editor.document.getLineStartOffset(editor.document.getLineNumber(offset)) +
-                    EditorUtil.getIndentLength(editor, offset)
+            val requestContext = runReadAction { InlineCompletionContext.RequestContext.from(editor, offset) }
+            val startLineOffset = runReadAction { editor.document.getLineStartOffset(editor.document.getLineNumber(offset)) +
+                    EditorUtil.getIndentLength(editor, offset) }
             val job = scope.launch {
                 widget?.setLoading(true)
                 val completionId = requestContext.completionId

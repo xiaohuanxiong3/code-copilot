@@ -3,6 +3,7 @@ package com.github.xiaohuanxiong3.codecopilot.completion
 import com.github.xiaohuanxiong3.codecopilot.util.DOCUMENT_CHANGED_TRIGGER_KEY
 import com.github.xiaohuanxiong3.codecopilot.util.globalIOScope
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.*
@@ -104,9 +105,9 @@ class InlineCompletionDocumentListener(private val editor: Editor, private val e
                 delay(500)
                 editor.project?.let { project ->
                     PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
-                        invokeLater {
-                            inlineCompletionService.triggerInlineCompletion(editor, editor.caretModel.offset)
-                        }
+//                        invokeLater {
+                            inlineCompletionService.triggerInlineCompletion(editor, runReadAction { editor.caretModel.offset } )
+//                        }
                     }
                 }
             }

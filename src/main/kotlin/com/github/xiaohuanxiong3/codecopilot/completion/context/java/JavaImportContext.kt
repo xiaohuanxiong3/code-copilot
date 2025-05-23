@@ -14,14 +14,18 @@ object JavaImportContext {
         (psiFile as PsiJavaFile).let {
             it.importList?.importStatements?.forEach { importStatement ->
                 importStatement.importReference?.resolve()?.let { resolvedElement ->
-                    resolvedElement.text?.let {
-                        if (fileIndex.isInSource(resolvedElement.containingFile.virtualFile)) {
-                            map[importStatement.importReference!!.qualifiedName] = resolvedElement.text
-                        }
-                    }
+//                    resolvedElement.text?.let {
+//                        if (fileIndex.isInSource(resolvedElement.containingFile.virtualFile)) {
+//                            map[importStatement.importReference!!.qualifiedName] = resolvedElement.text
+//                        }
+//                    }
+                    val psiFile = resolvedElement.containingFile as? PsiJavaFile
+                    if (psiFile == null) return
+                    map[importStatement.importReference!!.qualifiedName] = JavaFileSimplifier.simplify(psiFile)
                 }
             }
         }
     }
+
 
 }

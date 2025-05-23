@@ -11,11 +11,12 @@ object JavaPackageContext {
 
     fun attach(psiFile: PsiFile, map: MutableMap<String, String>) {
         (psiFile as PsiJavaFile).let {
-            it.classes.forEach { clazz ->
-                clazz.qualifiedName?.let { qualifiedName ->
-                    map[qualifiedName] = clazz.text
-                }
-            }
+//            it.classes.forEach { clazz ->
+//                clazz.qualifiedName?.let { qualifiedName ->
+//                    map[qualifiedName] = clazz.text
+//                }
+//            }
+            map[it.name] = JavaFileSimplifier.simplify(it)
         }
     }
 
