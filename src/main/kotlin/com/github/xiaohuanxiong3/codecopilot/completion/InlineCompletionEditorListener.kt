@@ -14,6 +14,7 @@ import com.intellij.psi.PsiDocumentManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.system.measureTimeMillis
 
 /**
  * @Author Handsome Young
@@ -106,8 +107,10 @@ class InlineCompletionDocumentListener(private val editor: Editor, private val e
 //                PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
                     documentChangedListenerJob = globalIOScope.launch {
                         val offset = runReadAction { editor.caretModel.offset }
-                        val requestContext = runReadAction { InlineCompletionContext.RequestContext.from(editor, offset) }
-                        delay(200)
+                        // 构建请求上下文和 延迟等待总共耗时至少300ms
+                        val requestContext = ensureMinExecutionTime(300) {
+                            runReadAction { InlineCompletionContext.RequestContext.from(editor, offset) }
+                        }
                         inlineCompletionService.triggerInlineCompletion(editor, runReadAction { editor.caretModel.offset }, requestContext)
 //                    }
                 }
@@ -115,6 +118,19 @@ class InlineCompletionDocumentListener(private val editor: Editor, private val e
         }
     }
 
+}
+
+suspend fun <T> ensureMinExecutionTime(
+    minTimeMs: Long = 300,
+    block: suspend () -> T
+): T {
+    var result: T
+    val elapsed = measureTimeMillis {
+        result = block()
+    }
+    val remaining = minTimeMs - elapsed
+    if (remaining > 0) delay(remaining)
+    return result
 }
 
 class InlineCompletionEditorListener : EditorFactoryListener{
