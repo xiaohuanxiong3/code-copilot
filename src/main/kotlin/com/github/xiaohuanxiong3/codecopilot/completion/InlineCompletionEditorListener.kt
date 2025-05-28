@@ -101,14 +101,15 @@ class InlineCompletionDocumentListener(private val editor: Editor, private val e
                 }
             }
 
-            documentChangedListenerJob = globalIOScope.launch {
-                delay(500)
-                editor.project?.let { project ->
-                    PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
-//                        invokeLater {
-                            inlineCompletionService.triggerInlineCompletion(editor, runReadAction { editor.caretModel.offset } )
-//                        }
-                    }
+            editor.project?.let { project ->
+                //  PsiDocumentManager.getInstance(project).performForCommittedDocument 是将 Document（纯文本）中所做的更改与 PSI 树（结构化的代码表示）同步的过程
+//                PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
+                    documentChangedListenerJob = globalIOScope.launch {
+                        val offset = runReadAction { editor.caretModel.offset }
+                        val requestContext = runReadAction { InlineCompletionContext.RequestContext.from(editor, offset) }
+                        delay(200)
+                        inlineCompletionService.triggerInlineCompletion(editor, runReadAction { editor.caretModel.offset }, requestContext)
+//                    }
                 }
             }
         }

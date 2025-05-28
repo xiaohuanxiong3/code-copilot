@@ -326,7 +326,7 @@ class InlineCompletionService(private val project: Project) : Disposable {
     fun isInlineCompletionVisibleAt(editor: Editor, offset: Int): Boolean =
         renderer.current?.editor == editor && renderer.current?.offset == offset
 
-    fun triggerInlineCompletion(editor: Editor, offset: Int) {
+    fun triggerInlineCompletion(editor: Editor, offset: Int, requestContext: InlineCompletionContext.RequestContext) {
         synchronized(currentContextWriteLock) {
             current?.let {
                 it.job?.cancel()
@@ -337,7 +337,7 @@ class InlineCompletionService(private val project: Project) : Disposable {
                 current = null
             }
 
-            val requestContext = runReadAction { InlineCompletionContext.RequestContext.from(editor, offset) }
+//            val requestContext = runReadAction { InlineCompletionContext.RequestContext.from(editor, offset) }
             val startLineOffset = runReadAction { editor.document.getLineStartOffset(editor.document.getLineNumber(offset)) +
                     EditorUtil.getIndentLength(editor, offset) }
             val job = scope.launch {
