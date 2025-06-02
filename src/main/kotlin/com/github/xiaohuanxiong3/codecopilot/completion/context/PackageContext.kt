@@ -5,7 +5,6 @@ import com.github.xiaohuanxiong3.codecopilot.completion.context.kotlin.KotlinPac
 import com.github.xiaohuanxiong3.codecopilot.completion.context.python.PythonPackageContext
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.psi.PsiFile
-import com.jetbrains.python.extensions.getQName
 
 /**
  * @Author Handsome Young
@@ -29,7 +28,7 @@ object PackageContext {
                         PythonPackageContext.attach(file, map)
                     }
                     else -> {
-                        map[file.getQName().toString()] = file.text
+                        map[file.name] = file.text
                     }
                 }
             }
