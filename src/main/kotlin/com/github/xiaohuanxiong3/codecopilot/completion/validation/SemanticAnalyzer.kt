@@ -62,13 +62,13 @@ object SemanticAnalyzer {
     fun simpleAnalyze(project: Project, psiFile: PsiFile): Boolean {
 //        HighlightingSettingsPerFile.getInstance(project).setHighlightingSettingForRoot(psiFile, FileHighlightingSetting.ESSENTIAL)
 
-        val daemonCodeAnalyzer = DaemonCodeAnalyzerImpl(project)
-        val highlights = runReadAction {
-            daemonCodeAnalyzer.restart(psiFile)
-            daemonCodeAnalyzer.waitForTermination()
-//            daemonCodeAnalyzer.getFileLevelHighlights(project, psiFile)
-            DaemonCodeAnalyzerImpl.getHighlights(psiFile.viewProvider.document, HighlightSeverity.ERROR, project)
-        }
-        return !highlights.any { it.severity == HighlightSeverity.ERROR }
+//        val daemonCodeAnalyzer = DaemonCodeAnalyzerImpl(project, CoroutineScope)
+//        val highlights = runReadAction {
+//            daemonCodeAnalyzer.restart(psiFile)
+//            daemonCodeAnalyzer.waitForTermination()
+//            DaemonCodeAnalyzerImpl.getHighlights(psiFile.viewProvider.document, HighlightSeverity.ERROR, project)
+//        }
+//        return !highlights.any { it.severity == HighlightSeverity.ERROR }
+        return false
     }
 }
