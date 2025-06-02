@@ -16,7 +16,7 @@ version = providers.gradleProperty("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 
     // LangChain4j kotlin 额外配置
     // https://docs.langchain4j.dev/tutorials/kotlin#compiler-compatibility
